@@ -3,9 +3,7 @@
 #include <limits>
 using namespace std;
 
-// =======================================================
 //  BASELINE APPROACH — ARRAY
-// =======================================================
 class PriceTrackerArray {
 private:
     vector<double> prices;
@@ -37,9 +35,7 @@ public:
 };
 
 
-// =======================================================
 //  AVL TREE NODE
-// =======================================================
 struct AVLNode {
     double value;
     AVLNode* left;
@@ -50,9 +46,7 @@ struct AVLNode {
 };
 
 
-// =======================================================
 //  AVL TREE IMPLEMENTATION
-// =======================================================
 class AVLTree {
 public:
     AVLNode* insert(AVLNode* node, double price) {
@@ -143,9 +137,7 @@ private:
 };
 
 
-// =======================================================
 //  OPTIMIZED PRICE TRACKER USING AVL TREE
-// =======================================================
 class PriceTrackerAVL {
 private:
     AVLNode* root = NULL;
@@ -166,9 +158,7 @@ public:
 };
 
 
-// =======================================================
 //  MAIN PROGRAM — ASKS FOR USER INPUT
-// =======================================================
 int main() {
     PriceTrackerArray arr;
     PriceTrackerAVL avl;
