@@ -1,0 +1,54 @@
+Optimized Algorithm (AVL Tree Approach)
+AVL Node Structure
+STRUCT Node:
+    value
+    left
+    right
+    height
+END STRUCT
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Pseudocode: Insert Operation
+FUNCTION Insert(node, price):
+
+    IF node IS NULL:
+        RETURN NewNode(price)
+
+    IF price < node.value:
+        node.left ← Insert(node.left, price)
+    ELSE:
+        node.right ← Insert(node.right, price)
+
+    UpdateHeight(node)
+
+    balance ← Height(node.left) - Height(node.right)
+
+    IF balance > 1 AND price < node.left.value:
+        RETURN RightRotate(node)        // LL Case
+
+    IF balance < -1 AND price > node.right.value:
+        RETURN LeftRotate(node)         // RR Case
+
+    IF balance > 1 AND price > node.left.value:
+        node.left ← LeftRotate(node.left)
+        RETURN RightRotate(node)        // LR Case
+
+    IF balance < -1 AND price < node.right.value:
+        node.right ← RightRotate(node.right)
+        RETURN LeftRotate(node)         // RL Case
+
+    RETURN node
+END FUNCTION
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Pseudocode: Get Minimum Price
+FUNCTION GetMin(node):
+    WHILE node.left IS NOT NULL:
+        node ← node.left
+    RETURN node.value
+END FUNCTION
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Pseudocode: Get Maximum Price
+FUNCTION GetMax(node):
+    WHILE node.right IS NOT NULL:
+        node ← node.right
+    RETURN node.value
+END FUNCTION

@@ -1,0 +1,34 @@
+Baseline Algorithm (Array Approach)
+
+Pseudocode: Add Price
+FUNCTION AddPrice(price):
+    Append price TO PriceArray
+END FUNCTION
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Pseudocode: Get Minimum Price
+FUNCTION GetMinPrice():
+    IF PriceArray IS empty:
+        RETURN "No data"
+
+    minValue ← +infinity
+
+    FOR each value p IN PriceArray:
+        IF p < minValue:
+            minValue ← p
+
+    RETURN minValue
+END FUNCTION
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Pseudocode: Get Maximum Price
+FUNCTION GetMaxPrice():
+    IF PriceArray IS empty:
+        RETURN "No data"
+
+    maxValue ← -infinity
+
+    FOR each value p IN PriceArray:
+        IF p > maxValue:
+            maxValue ← p
+
+    RETURN maxValue
+END FUNCTION
