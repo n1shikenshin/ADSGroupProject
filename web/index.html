@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Price Tracker — Array vs AVL Tree</title>
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: radial-gradient(circle at top, #0a0f24, #020411);
+    color: #fff;
+    overflow-x: hidden;
+}
+.navbar {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+}
+.navbtn {
+    padding: 12px 22px;
+    border-radius: 10px;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: white;
+    background: linear-gradient(135deg,#007bff,#00eaff);
+    transition: all .3s ease;
+}
+.navbtn.inactive {
+    background: rgba(255,255,255,0.1);
+    color: #9dd;
+}
+.navbtn:hover {
+    transform: scale(1.07);
+    box-shadow: 0 0 15px #00eaff, 0 0 30px #007bff;
+}
+h1 {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 38px;
+    text-shadow: 0 0 12px #4ffcff;
+    animation: glowPulse 2s infinite alternate;
+}
+@keyframes glowPulse{
+    0%{text-shadow:0 0 8px #00eaff,0 0 16px #007bff;}
+    100%{text-shadow:0 0 18px #00eaff,0 0 30px #007bff;}
+}
+.container {
+    width: 90%;
+    max-width: 750px;
+    margin: 40px auto;
+}
+.card {
+    padding: 25px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 25px rgba(0,255,255,0.1);
+    margin-bottom: 20px;
+    transition: transform .2s;
+}
+.card:hover { transform: translateY(-5px); }
+label {
+    font-size: 18px;
+    margin-top: 10px;
+    display: block;
+}
+input {
+    width: 95%;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+}
+button {
+    margin-top: 15px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #00eaff, #007bff);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all .3s;
+}
+button:hover {
+    box-shadow: 0 0 15px #00eaff, 0 0 25px #007bff;
+    transform: scale(1.05);
+}
+.result-box {
+    background: rgba(255,255,255,0.07);
+    padding: 18px;
+    border-radius: 12px;
+    margin-top: 15px;
+    font-size: 18px;
+    box-shadow: inset 0 0 12px rgba(0,255,255,0.18);
+    min-height: 50px;
+}
+.page { display: none; }
+
+/* LOADING OVERLAY */
+#loadingOverlay {
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(0,0,0,0.8);
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    display:none;
+}
+.spinner {
+    border: 8px solid rgba(255,255,255,0.2);
+    border-top: 8px solid #00eaff;
+    border-radius: 50%;
+    width: 80px; height: 80px;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0%{transform:rotate(0deg);}
+    100%{transform:rotate(360deg);}
+}
+#progressBarContainer {
+    width: 60%;
+    height: 20px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    margin-top: 20px;
+}
+#progressBar {
+    width: 0%;
+    height: 100%;
+    background: #00eaff;
+    border-radius: 10px;
+    transition: width 0.1s;
+}
+
+/* TOP INFO */
+#topInfo{
+    position: fixed; top: 0; left: 20px;
+    color: #00eaff;
+    font-weight: bold;
+    font-size: 16px;
+    z-index: 100;
+    animation: pulse 2s infinite alternate;
+}
+@keyframes pulse{
+    0%{text-shadow:0 0 5px #00eaff;}
+    100%{text-shadow:0 0 15px #00eaff,0 0 25px #007bff;}
+}
+
+/* BOTTOM CREDIT */
+#credit{
+    position: fixed; bottom: 15px; width: 100%; text-align: center; 
+    color: #00eaff; font-size: 16px;
+    animation: creditGlow 2s infinite alternate;
+}
+@keyframes creditGlow{
+    0%{text-shadow:0 0 5px #00eaff;}
+    100%{text-shadow:0 0 15px #00eaff,0 0 25px #007bff;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP INFO -->
+<div id="topInfo">TFB2023 / TEB1113 - Algorithm & Data Structure Group Project</div>
+
+<div class="navbar">
+    <button id="btnArray" class="navbtn" onclick="switchMode('array')">Array Version</button>
+    <button id="btnAVL" class="navbtn inactive" onclick="switchMode('avl')">AVL Version</button>
+</div>
+
+<h1>💰 Price Tracker Demo</h1>
+
+<div class="container">
+
+    <!-- ARRAY PAGE -->
+    <div id="pageArray" class="page">
+        <div class="card">
+            <h2>📦 Array Mode (Slow)</h2>
+            <label>Price:</label>
+            <input id="arrayPrice" type="number" placeholder="e.g. 129.90">
+            <label>Store:</label>
+            <input id="arrayStore" type="text" placeholder="e.g. Tesco">
+            <button onclick="addArray()">➕ Add Price</button>
+            <button onclick="minArray()">📉 Min Price</button>
+            <button onclick="maxArray()">📈 Max Price</button>
+            <div id="arrayOutput" class="result-box">Waiting...</div>
+        </div>
+    </div>
+
+    <!-- AVL PAGE -->
+    <div id="pageAVL" class="page">
+        <div class="card">
+            <h2>⚡ AVL Tree Mode (Fast)</h2>
+            <label>Number of entries:</label>
+            <input id="avlCount" type="number" min="1" placeholder="e.g. 3">
+            <button onclick="generateAVLInputs()">Generate Inputs</button>
+            <div id="avlInputsContainer" style="margin-top:20px"></div>
+            <button id="processAVLBtn" onclick="processAVL()" style="display:none">Process All</button>
+            <div id="avlOutput" class="result-box">Waiting...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay">
+    <div class="spinner"></div>
+    <div id="progressBarContainer">
+        <div id="progressBar"></div>
+    </div>
+    <div style="margin-top:15px;font-size:18px;">Processing... please wait</div>
+</div>
+
+<!-- Bottom Credit -->
+<div id="credit">Group 4 - Price Tracker Product</div>
+
+<script>
+// ---------------- PAGE SWITCH ----------------
+function switchMode(mode){
+    document.getElementById("pageArray").style.display="none";
+    document.getElementById("pageAVL").style.display="none";
+    document.getElementById("btnArray").classList.add("inactive");
+    document.getElementById("btnAVL").classList.add("inactive");
+
+    if(mode==="array"){
+        document.getElementById("pageArray").style.display="block";
+        document.getElementById("btnArray").classList.remove("inactive");
+    }else{
+        document.getElementById("pageAVL").style.display="block";
+        document.getElementById("btnAVL").classList.remove("inactive");
+    }
+}
+switchMode("array");
+
+// ---------------- ARRAY LOGIC ----------------
+let arrayPrices = [];
+
+function showLoading(progress=1000){
+    return new Promise(res=>{
+        document.getElementById("loadingOverlay").style.display="flex";
+        let bar = document.getElementById("progressBar");
+        bar.style.width="0%";
+        let start=0;
+        let interval = setInterval(()=>{
+            start+=1;
+            bar.style.width = start+"%";
+            if(start>=100){
+                clearInterval(interval);
+                document.getElementById("loadingOverlay").style.display="none";
+                res();
+            }
+        }, progress/100);
+    });
+}
+
+async function addArray(){
+    let price = parseFloat(document.getElementById("arrayPrice").value);
+    let store = document.getElementById("arrayStore").value;
+    if(!price||!store) return;
+    await showLoading(1000);
+    for(let i=0;i<50000;i++){for(let j=0;j<100;j++){}}
+    arrayPrices.push({price,store});
+    document.getElementById("arrayOutput").innerHTML = `Added RM${price.toFixed(2)} from <b>${store}</b>`;
+}
+
+async function minArray(){
+    if(arrayPrices.length===0) return;
+    await showLoading(1500);
+    let min=arrayPrices[0];
+    arrayPrices.forEach(i=>{if(i.price<min.price)min=i;});
+    document.getElementById("arrayOutput").innerHTML=`Min Price: RM${min.price.toFixed(2)} <br>Store: <b>${min.store}</b>`;
+}
+
+async function maxArray(){
+    if(arrayPrices.length===0) return;
+    await showLoading(1500);
+    let max=arrayPrices[0];
+    arrayPrices.forEach(i=>{if(i.price>max.price)max=i;});
+    document.getElementById("arrayOutput").innerHTML=`Max Price: RM${max.price.toFixed(2)} <br>Store: <b>${max.store}</b>`;
+}
+
+// ---------------- AVL LOGIC ----------------
+class AVLNode{
+    constructor(price,store){this.price=price;this.store=store;this.left=this.right=null;this.height=1;}
+}
+class AVL{
+    constructor(){this.root=null;}
+    height(n){return n?n.height:0;}
+    rightRotate(y){
+        let x=y.left;
+        y.left=x.right;
+        x.right=y;
+        y.height=Math.max(this.height(y.left),this.height(y.right))+1;
+        x.height=Math.max(this.height(x.left),this.height(x.right))+1;
+        return x;
+    }
+    leftRotate(x){
+        let y=x.right;
+        x.right=y.left;
+        y.left=x;
+        x.height=Math.max(this.height(x.left),this.height(x.right))+1;
+        y.height=Math.max(this.height(y.left),this.height(y.right))+1;
+        return y;
+    }
+    getBalance(n){return n?this.height(n.left)-this.height(n.right):0;}
+    insert(node,price,store){
+        if(!node)return new AVLNode(price,store);
+        if(price<node.price)node.left=this.insert(node.left,price,store);
+        else node.right=this.insert(node.right,price,store);
+        node.height=1+Math.max(this.height(node.left),this.height(node.right));
+        let balance=this.getBalance(node);
+        if(balance>1&&price<node.left.price)return this.rightRotate(node);
+        if(balance<-1&&price>node.right.price)return this.leftRotate(node);
+        if(balance>1&&price>node.left.price){node.left=this.leftRotate(node.left);return this.rightRotate(node);}
+        if(balance<-1&&price<node.right.price){node.right=this.rightRotate(node.right);return this.leftRotate(node);}
+        return node;
+    }
+    add(price,store){this.root=this.insert(this.root,price,store);}
+    getMin(){let curr=this.root;while(curr.left)curr=curr.left;return curr;}
+    getMax(){let curr=this.root;while(curr.right)curr=curr.right;return curr;}
+}
+let avl=new AVL();
+
+function generateAVLInputs(){
+    let n=parseInt(document.getElementById("avlCount").value);
+    if(!n||n<1)return;
+    let container=document.getElementById("avlInputsContainer");
+    container.innerHTML="";
+    for(let i=0;i<n;i++){
+        let div=document.createElement("div");
+        div.innerHTML=`<label>Store ${i+1}:</label>
+        <input type="text" id="avlStore${i}"><label>Price ${i+1}:</label>
+        <input type="number" id="avlPrice${i}"><br>`;
+        container.appendChild(div);
+    }
+    document.getElementById("processAVLBtn").style.display="inline-block";
+}
+
+function processAVL(){
+    let container=document.getElementById("avlInputsContainer");
+    let inputs=container.querySelectorAll("input");
+    for(let i=0;i<inputs.length;i+=2){
+        let store=inputs[i].value;
+        let price=parseFloat(inputs[i+1].value);
+        if(store&&price)avl.add(price,store);
+    }
+    let min=avl.getMin();
+    let max=avl.getMax();
+    document.getElementById("avlOutput").innerHTML=`Min Price: RM${min.price.toFixed(2)} <b>${min.store}</b><br>
+    Max Price: RM${max.price.toFixed(2)} <b>${max.store}</b>`;
+}
+</script>
+
+</body>
+</html>
